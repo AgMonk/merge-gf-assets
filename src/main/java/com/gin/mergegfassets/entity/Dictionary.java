@@ -35,9 +35,10 @@ public class Dictionary {
 
     public Dictionary(File file) throws IOException {
         this.file = file;
-        final String res = JsonUtils.readFromFile(file);
-        this.data = JSONObject.parseObject(res).to(new TypeReference<TreeMap<String, String>>() {
-        });
+        if (file.exists()) {
+            final String res = JsonUtils.readFromFile(file);
+            this.data = JSONObject.parseObject(res).to(new TypeReference<TreeMap<String, String>>() {});
+        }
     }
 
     public void save() throws IOException {
