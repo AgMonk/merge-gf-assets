@@ -1,5 +1,6 @@
 package com.gin.mergegfassets;
 
+import com.gin.mergegfassets.entity.AssetFileGroup;
 import com.gin.mergegfassets.script.MergeImage;
 import com.gin.mergegfassets.utils.FileUtils;
 import com.gin.mergegfassets.utils.IoUtils;
@@ -31,10 +32,10 @@ public class MergeGfAssetsApplication {
         //扫描assets文件夹
 
         //标清立绘 + 差分等其他文件
-        final List<File> charFiles = FileUtils.listAllFilesWithTimeCost(new File(assetDir.getPath() + "/characters"));
+        final AssetFileGroup charFiles = new AssetFileGroup(assetDir, "/characters");
         //高清立绘
-        final List<File> gunFiles = FileUtils.listAllFilesWithTimeCost(new File(assetDir.getPath() + "/resources/dabao/pics/guns"));
-        final List<File> fairyFiles = FileUtils.listAllFilesWithTimeCost(new File(assetDir.getPath() + "/resources/dabao/pics/fairy"));
+        final AssetFileGroup gunFiles = new AssetFileGroup(assetDir, "/resources/dabao/pics/guns");
+        final AssetFileGroup fairyFiles = new AssetFileGroup(assetDir, "/resources/dabao/pics/fairy");
 
         // todo 解析图片文件
         // todo 尝试将原文件 与 alpha文件配对
