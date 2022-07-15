@@ -17,6 +17,11 @@ import java.util.TreeMap;
  * @since : 2022/7/15 10:41
  **/
 public class Dictionary {
+    /**
+     * 标记，表示该文件不需要合并，直接复制
+     */
+    public static final String METHOD_COPY = "COPY";
+
     TreeMap<String, String> data;
 
     File file;
@@ -36,8 +41,12 @@ public class Dictionary {
     public Dictionary(File file) throws IOException {
         this.file = file;
         if (file.exists()) {
+            System.out.println("Loading Dictionary " + file.getPath());
             final String res = JsonUtils.readFromFile(file);
-            this.data = JSONObject.parseObject(res).to(new TypeReference<TreeMap<String, String>>() {});
+            this.data = JSONObject.parseObject(res).to(new TypeReference<TreeMap<String, String>>() {
+            });
+        }else{
+            System.out.println("Created Dictionary " + file.getPath());
         }
     }
 

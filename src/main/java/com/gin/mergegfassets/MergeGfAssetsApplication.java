@@ -1,6 +1,7 @@
 package com.gin.mergegfassets;
 
 import com.gin.mergegfassets.entity.AssetFileGroup;
+import com.gin.mergegfassets.entity.Dictionary;
 import com.gin.mergegfassets.script.MergeImage;
 import com.gin.mergegfassets.utils.FileUtils;
 import com.gin.mergegfassets.utils.IoUtils;
@@ -23,6 +24,9 @@ public class MergeGfAssetsApplication {
 
         //加载 dll
         MergeImage.init();
+
+        //加载字典
+        final Dictionary dictionary = new Dictionary(new File(System.getProperty("user.dir") + "/Dic.json"));
 
         //指定 assets文件夹路径
         File assetDir = IoUtils.readAssetPath();
