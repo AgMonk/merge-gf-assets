@@ -136,4 +136,12 @@ public class FileUtils {
         }
         return list;
     }
+
+    public static List<File> listAllFilesWithTimeCost(File dir){
+        final long start = System.currentTimeMillis();
+        final List<File> list = listAllFiles(dir);
+        System.out.printf("Found %d files ",list.size());
+        TimeUtils.printlnTimeCost(start);
+        return list;
+    }
 }

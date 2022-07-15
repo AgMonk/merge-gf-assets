@@ -12,6 +12,6 @@ public class TimeUtils {
         final long range = (end - start) / 100;
         final double time = 1.0 * range;
 
-        System.out.println("cost： " + time / 10 + "s");
+        System.out.println("time cost： " + time / 10 + "s");
     }
 }
