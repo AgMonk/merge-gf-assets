@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author : ginstone
@@ -11,6 +13,7 @@ import java.io.InputStreamReader;
  * @since : 2022/7/15 11:15
  **/
 public class IoUtils {
+    public static final Pattern NUMBER = Pattern.compile("^\\d+$");
 
     public static File readAssetPath() throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
@@ -21,16 +24,30 @@ public class IoUtils {
         }
         return assetDir;
     }
-     public static File readOutputPath() throws IOException {
+
+    public static File readOutputPath() throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         File output = null;
         while (output == null || output.exists()) {
             System.out.print("Output >> ");
             output = new File(reader.readLine());
         }
-         //noinspection ResultOfMethodCallIgnored
-         output.mkdirs();
+        //noinspection ResultOfMethodCallIgnored
+        output.mkdirs();
         return output;
+    }
+
+    public static int readNumber(String prefix) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        String line = null;
+        boolean isNumber = false;
+        while (line == null || !isNumber) {
+            System.out.print(prefix + " >> ");
+            line = reader.readLine();
+            final Matcher matcher = NUMBER.matcher(line);
+            isNumber = matcher.find();
+        }
+        return Integer.parseInt(line);
     }
 
 

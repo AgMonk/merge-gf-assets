@@ -33,6 +33,7 @@ public class MergeGfAssetsApplication {
 //        File outputDir = IoUtils.readOutputPath();
 
         final int coreSize = 10;
+//        final int coreSize = IoUtils.readNumber("Threads:");
         final ThreadPoolTaskExecutor executor = TasksUtil.getExecutor("Merge", coreSize);
         //扫描assets文件夹
 
@@ -48,8 +49,6 @@ public class MergeGfAssetsApplication {
 
         executor.shutdown();
         executor.destroy();
-        // todo 解析图片文件
-        // todo 尝试将原文件 与 alpha文件配对
         // todo 配对失败时从总文件列表中查找可能的备选项，复制到临时文件夹中供选择；选定后添加到字典中保存
         //
     }
