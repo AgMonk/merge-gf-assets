@@ -1,17 +1,15 @@
 package com.gin.mergegfassets;
 
+import com.gin.mergegfassets.entity.AssetFile;
 import com.gin.mergegfassets.entity.AssetFileGroup;
 import com.gin.mergegfassets.entity.Dictionary;
 import com.gin.mergegfassets.script.MergeImage;
-import com.gin.mergegfassets.utils.FileUtils;
-import com.gin.mergegfassets.utils.IoUtils;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author bx002
@@ -29,9 +27,10 @@ public class MergeGfAssetsApplication {
         final Dictionary dictionary = new Dictionary(new File(System.getProperty("user.dir") + "/Dic.json"));
 
         //指定 assets文件夹路径
-        File assetDir = IoUtils.readAssetPath();
+        File assetDir = new File("F:\\Texture2D\\assets");
+//        File assetDir = IoUtils.readAssetPath();
         //指定 输出文件夹路径
-        File outputDir = IoUtils.readOutputPath();
+//        File outputDir = IoUtils.readOutputPath();
 
         //扫描assets文件夹
 
@@ -39,7 +38,17 @@ public class MergeGfAssetsApplication {
         final AssetFileGroup charFiles = new AssetFileGroup(assetDir, "/characters");
         //高清立绘
         final AssetFileGroup gunFiles = new AssetFileGroup(assetDir, "/resources/dabao/pics/guns");
+        //妖精立绘
         final AssetFileGroup fairyFiles = new AssetFileGroup(assetDir, "/resources/dabao/pics/fairy");
+
+        final List<AssetFile> gunRawFiles = gunFiles.getRawFiles();
+        final List<AssetFile> gunAlphaFiles = gunFiles.getAlphaFiles();
+        for (AssetFile rawFile : gunRawFiles) {
+            final List<AssetFile> matchedFiles = gunAlphaFiles.stream().filter(rawFile::matchPair).collect(Collectors.toList());
+            final String alphaString = matchedFiles.stream().map(f -> String.format("%s -> %s", f.getFile().getName(), f.toFormatName())).collect(Collectors.joining(" , "));
+            System.out.printf("%s -> %s -----> (%d)[%s] \n", rawFile.getFile().getName(), rawFile.toFormatName(), matchedFiles.size(),alphaString);
+        }
+
 
         // todo 解析图片文件
         // todo 尝试将原文件 与 alpha文件配对

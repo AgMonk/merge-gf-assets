@@ -26,6 +26,7 @@ public class AssetFileGroup {
                 .stream()
                 //过滤编队界面图
                 .filter(f -> !f.getName().endsWith("_N.png"))
+                .filter(f -> !f.getName().endsWith("_Pass.png"))
                 //过滤spine图
                 .filter(f -> !f.getParentFile().getName().contains("spine"))
                 .map(AssetFile::new).collect(Collectors.toList());
