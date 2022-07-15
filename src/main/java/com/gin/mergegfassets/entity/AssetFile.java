@@ -186,4 +186,7 @@ public class AssetFile {
     public String toFilename(){
         return this.toFormatName()+this.extensions;
     }
+
+    // todo 配对失败时从总文件列表中查找可能的备选项，复制到临时文件夹中供选择；选定后添加到字典中保存
+
 }

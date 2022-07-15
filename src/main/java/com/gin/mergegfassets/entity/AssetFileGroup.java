@@ -66,7 +66,7 @@ public class AssetFileGroup {
                     if (matchedFiles.size() > 0) {
                         final AssetFile alphaFile = matchedFiles.get(0);
                         final String path = rawFile.getParentPath().substring(rawFile.getParentPath().indexOf(this.path));
-                        final File destFile = new File(outputDir.getPath() + path + '/' + rawFile.toFormatName() + rawFile.getExtensions());
+                        final File destFile = new File(outputDir.getPath() + path + '/' + rawFile.toFilename());
                         if (destFile.exists()) {
                             System.out.printf("[warning] File Exists Skipped : %s \n", destFile.getPath());
                         } else {
