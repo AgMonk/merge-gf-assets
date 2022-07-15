@@ -4,7 +4,9 @@ import com.gin.mergegfassets.entity.AssetFile;
 import com.gin.mergegfassets.entity.AssetFileGroup;
 import com.gin.mergegfassets.entity.Dictionary;
 import com.gin.mergegfassets.script.MergeImage;
+import com.gin.mergegfassets.utils.TasksUtil;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,6 +33,7 @@ public class MergeGfAssetsApplication {
 //        File assetDir = IoUtils.readAssetPath();
         //指定 输出文件夹路径
 //        File outputDir = IoUtils.readOutputPath();
+        final ThreadPoolTaskExecutor executor = TasksUtil.getExecutor("Merge", 10);
 
         //扫描assets文件夹
 
