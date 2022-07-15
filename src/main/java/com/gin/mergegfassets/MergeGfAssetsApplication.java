@@ -27,7 +27,9 @@ public class MergeGfAssetsApplication {
         File assetDir = IoUtils.readAssetPath();
 
         //扫描assets文件夹
-        final List<File> allFiles = FileUtils.listAllFilesWithTimeCost(assetDir);
+        final List<File> charFiles = FileUtils.listAllFilesWithTimeCost(new File(assetDir.getPath() + "/characters"));
+        final List<File> gunFiles = FileUtils.listAllFilesWithTimeCost(new File(assetDir.getPath() + "/resources/dabao/pics/guns"));
+        final List<File> fairyFiles = FileUtils.listAllFilesWithTimeCost(new File(assetDir.getPath() + "/resources/dabao/pics/fairy"));
 
         // todo 解析图片文件
         // todo 尝试将原文件 与 alpha文件配对
