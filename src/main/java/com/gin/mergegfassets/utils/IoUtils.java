@@ -21,4 +21,17 @@ public class IoUtils {
         }
         return assetDir;
     }
+     public static File readOutputPath() throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        File output = null;
+        while (output == null || output.exists()) {
+            System.out.print("Output : ");
+            output = new File(reader.readLine());
+        }
+         //noinspection ResultOfMethodCallIgnored
+         output.mkdirs();
+        return output;
+    }
+
+
 }

@@ -25,9 +25,14 @@ public class MergeGfAssetsApplication {
 
         //指定 assets文件夹路径
         File assetDir = IoUtils.readAssetPath();
+        //指定 输出文件夹路径
+        File outputDir = IoUtils.readOutputPath();
 
         //扫描assets文件夹
+
+        //标清立绘 + 差分等其他文件
         final List<File> charFiles = FileUtils.listAllFilesWithTimeCost(new File(assetDir.getPath() + "/characters"));
+        //高清立绘
         final List<File> gunFiles = FileUtils.listAllFilesWithTimeCost(new File(assetDir.getPath() + "/resources/dabao/pics/guns"));
         final List<File> fairyFiles = FileUtils.listAllFilesWithTimeCost(new File(assetDir.getPath() + "/resources/dabao/pics/fairy"));
 
