@@ -15,26 +15,26 @@ import java.util.regex.Pattern;
 public class IoUtils {
     public static final Pattern NUMBER = Pattern.compile("^\\d+$");
 
-    public static File readAssetPath() throws IOException {
+    public static String readAssetPath() throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         File assetDir = null;
         while (assetDir == null || !assetDir.exists()) {
             System.out.print("AssetPath >> ");
             assetDir = new File(reader.readLine());
         }
-        return assetDir;
+        return assetDir.getPath();
     }
 
-    public static File readOutputPath() throws IOException {
+    public static String readOutputPath() throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         File output = null;
-        while (output == null || output.exists()) {
+        while (output == null || !output.exists()) {
             System.out.print("Output >> ");
             output = new File(reader.readLine());
         }
         //noinspection ResultOfMethodCallIgnored
         output.mkdirs();
-        return output;
+        return output.getPath();
     }
 
     public static int readNumber(String prefix) throws IOException {

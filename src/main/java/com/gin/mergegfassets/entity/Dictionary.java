@@ -3,11 +3,9 @@ package com.gin.mergegfassets.entity;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.TypeReference;
 import com.gin.mergegfassets.utils.JsonUtils;
-import lombok.Data;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.LinkedHashMap;
 import java.util.TreeMap;
 
 /**
@@ -38,15 +36,15 @@ public class Dictionary {
         this.data.put(key, value);
     }
 
-    public Dictionary(File file) throws IOException {
-        this.file = file;
-        if (file.exists()) {
-            System.out.println("Loading Dictionary " + file.getPath());
-            final String res = JsonUtils.readFromFile(file);
+    public Dictionary() throws IOException {
+        this.file = new File(System.getProperty("user.dir") + "/dic.json");
+        if (this.file.exists()) {
+            System.out.println("Loading Dictionary " + this.file.getPath());
+            final String res = JsonUtils.readFromFile(this.file);
             this.data = JSONObject.parseObject(res).to(new TypeReference<TreeMap<String, String>>() {
             });
         }else{
-            System.out.println("Created Dictionary " + file.getPath());
+            System.out.println("Created Dictionary " + this.file.getPath());
         }
     }
 

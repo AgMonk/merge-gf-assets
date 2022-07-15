@@ -45,11 +45,11 @@ public class AssetFileGroup {
      * @param outputDir 输出目录
      * @param executor  线程池
      */
-    public void mergeByMatchPair(File outputDir, ThreadPoolTaskExecutor executor) throws InterruptedException {
+    public void mergeByMatchPair(File outputDir, ThreadPoolTaskExecutor executor, Integer limit) throws InterruptedException {
         System.out.println("Merge Start: " + this.path);
         final long start = System.currentTimeMillis();
         this.rawFiles
-                .stream().limit(30)
+                .stream().limit(limit == null ? this.rawFiles.size() : limit)
                 .forEach(rawFile -> {
                     final List<AssetFile> matchedFiles = this.alphaFiles.stream()
                             .filter(f -> rawFile.getParentPath().equals(f.getParentPath()))
