@@ -16,7 +16,7 @@ public class IoUtils {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         File assetDir = null;
         while (assetDir == null || !assetDir.exists()) {
-            System.out.print("AssetPath : ");
+            System.out.print("AssetPath >> ");
             assetDir = new File(reader.readLine());
         }
         return assetDir;
@@ -25,7 +25,7 @@ public class IoUtils {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         File output = null;
         while (output == null || output.exists()) {
-            System.out.print("Output : ");
+            System.out.print("Output >> ");
             output = new File(reader.readLine());
         }
          //noinspection ResultOfMethodCallIgnored
