@@ -22,6 +22,11 @@ public class AssetFileGroup {
     public AssetFileGroup(File assetDir , String path) {
         this.path = path;
         this.files = FileUtils.listAllFilesWithTimeCost(new File(assetDir.getPath() + path))
-                .stream().map(AssetFile::new).collect(Collectors.toList());
+                .stream()
+                //过滤编队界面图
+                .filter(f->!f.getName().endsWith("_N.png"))
+                //过滤spine图
+                .filter(f->!f.getParentFile().getName().contains("spine"))
+                .map(AssetFile::new).collect(Collectors.toList());
     }
 }
