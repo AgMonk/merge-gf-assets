@@ -141,7 +141,7 @@ public class FileUtils {
         final long start = System.currentTimeMillis();
         final List<File> list = listAllFiles(dir);
         System.out.printf("Scanned %s | Found %d Files | ",dir.getPath(),list.size());
-        TimeUtils.printlnTimeCost(start);
+        TimeUtils.printlnTimeCost(start, null);
         return list;
     }
 }

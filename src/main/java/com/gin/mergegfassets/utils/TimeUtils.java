@@ -7,11 +7,11 @@ package com.gin.mergegfassets.utils;
  **/
 public class TimeUtils {
 
-    public static void printlnTimeCost(long start) {
+    public static void printlnTimeCost(long start, String prefix) {
         final long end = System.currentTimeMillis();
         final long range = (end - start) / 100;
         final double time = 1.0 * range;
 
-        System.out.println("time cost： " + time / 10 + "s");
+        System.out.println((prefix==null?"":prefix) + "time cost： " + time / 10 + "s");
     }
 }

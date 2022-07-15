@@ -135,11 +135,6 @@ public class AssetFile {
         return true;
     }
 
-    public boolean matchPair2(AssetFile assetFile){
-        System.out.printf("comparing %s -> %s \n" , this.toFormatName(), assetFile.toFormatName());
-        return assetFile.toFormatName().equals(this.toFormatName() + ALPHA);
-    }
-
     public AssetFile(File file) {
         this.file = file;
         this.parentPath = file.getParentFile().getPath();
@@ -186,5 +181,9 @@ public class AssetFile {
             this.version = null;
             this.difference = false;
         }
+    }
+
+    public String toFilename(){
+        return this.toFormatName()+this.extensions;
     }
 }
