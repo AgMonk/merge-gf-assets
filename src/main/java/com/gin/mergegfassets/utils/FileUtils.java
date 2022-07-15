@@ -119,4 +119,21 @@ public class FileUtils {
             System.out.println(source.getName() + " 复制到 -> " + dest.getPath());
         }
     }
+
+    public static List<File> listAllFiles(File dir){
+        final ArrayList<File> list = new ArrayList<>();
+        if (dir==null || !dir.exists()) {
+            return list;
+        }
+        final File[] files = dir.listFiles();
+        assert files != null;
+        for (File file : files) {
+            if (file.isDirectory()) {
+                list.addAll(listAllFiles(file));
+            }else{
+                list.add(file);
+            }
+        }
+        return list;
+    }
 }

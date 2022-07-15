@@ -1,7 +1,7 @@
 package com.gin.mergegfassets;
 
 import com.gin.mergegfassets.script.MergeImage;
-import org.springframework.boot.SpringApplication;
+import com.gin.mergegfassets.utils.IoUtils;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.io.BufferedReader;
@@ -15,21 +15,19 @@ public class MergeGfAssetsApplication {
     public static void main(String[] args) throws IOException {
 //        SpringApplication.run(MergeGfAssetsApplication.class, args);
 
+        //加载 dll
         MergeImage.init();
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        File assetDir = null;
-        while (assetDir == null || !assetDir.exists()) {
-            System.out.print("AssetPath : ");
-            assetDir = new File(reader.readLine());
-        }
-        System.out.println("path = " + assetDir.getPath());
+        //指定 assets文件夹路径
+        File assetDir = IoUtils.readAssetPath();
 
-        File rawFile = new File("F:/resource_downloader/py/aa/assets/resources/dabao/pics/guns/ro635_4504/pic_RO635_4504_HD.png");
-        File alphaFile = new File("F:/resource_downloader/py/aa/assets/resources/dabao/pics/guns/ro635_4504/pic_RO635_4504_HD_Alpha.png");
-        File destFile = new File("F:/resource_downloader/py/aa/pic_RO635_4504.png");
-        MergeImage.mergeOpenCV(rawFile, alphaFile, destFile);
 
+
+        // todo 扫描assets文件夹
+        // todo 解析图片文件
+        // todo 尝试将原文件 与 alpha文件配对
+        // todo 配对失败时从总文件列表中查找可能的备选项，复制到临时文件夹中供选择；选定后添加到字典中保存
+        //
     }
 
 }

@@ -1,7 +1,6 @@
 package com.gin.mergegfassets.script;
 
 import com.gin.mergegfassets.utils.TimeUtils;
-import lombok.extern.slf4j.Slf4j;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.core.Size;
@@ -14,7 +13,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 
 /**
  * @author : ginstone
@@ -22,7 +20,7 @@ import java.net.URL;
  * @since : 2022/7/13 16:30
  **/
 public class MergeImage {
-    public static void mergeOpenCV(File rawFile, File alphaFile, File destFile) throws IOException {
+    public static void mergeOpenCv(File rawFile, File alphaFile, File destFile) throws IOException {
         final long start = System.currentTimeMillis();
         // 原图
         final BufferedImage rawImage = ImageIO.read(rawFile);
