@@ -140,7 +140,7 @@ public class AssetFileGroup {
                 System.out.printf("原文件: %s 路径: %s \n",rawFile.toFormatName(),rawFile.getFile().getPath());
                 final int size = similarAlphaFiles.size();
                 for (int i = 0; i < size; i++) {
-                    final AssetFile saf = similarAlphaFiles.get(0);
+                    final AssetFile saf = similarAlphaFiles.get(i);
                     System.out.printf("\t[%d] Alpha文件: %s 路径: %s \n",i,saf.toFormatName(),saf.getFile().getPath());
                 }
                 //用户输入
