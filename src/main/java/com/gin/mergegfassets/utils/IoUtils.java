@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -48,6 +49,18 @@ public class IoUtils {
             isNumber = matcher.find();
         }
         return Integer.parseInt(line);
+    }
+
+    public static String readCommand(String info, Function<String, Boolean> func) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        String line = null;
+        boolean done = false;
+        while (line==null || !done){
+            System.out.print(info + " >> ");
+            line = reader.readLine();
+            done = func.apply(line);
+        }
+        return line;
     }
 
 }

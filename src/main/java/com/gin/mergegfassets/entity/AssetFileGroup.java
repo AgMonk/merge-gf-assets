@@ -2,6 +2,8 @@ package com.gin.mergegfassets.entity;
 
 import com.gin.mergegfassets.script.MergeImage;
 import com.gin.mergegfassets.utils.FileUtils;
+import com.gin.mergegfassets.utils.IoUtils;
+import com.gin.mergegfassets.utils.NumberUtils;
 import com.gin.mergegfassets.utils.TimeUtils;
 import lombok.Data;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -9,6 +11,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -119,7 +122,8 @@ public class AssetFileGroup {
      * @param limit      合并的数量
      * @param dictionary 字典
      */
-    public void mergeByMatchPair(File outputDir, ThreadPoolTaskExecutor executor, Integer limit, Dictionary dictionary) throws InterruptedException {
+    public void mergeByMatchPair(File outputDir, ThreadPoolTaskExecutor executor, Integer limit, Dictionary dictionary)
+            throws InterruptedException, IOException {
         System.out.println("--------------------------");
         System.out.println("合并开始: " + this.path);
         final long start = System.currentTimeMillis();
@@ -127,7 +131,39 @@ public class AssetFileGroup {
         match(outputDir, dictionary);
 
         // 为每一个相似的文件指定匹配的 Alpha 文件
+        if (this.similarPairs.size()>0) {
         // todo
+            for (AssetFilePair similarPair : this.similarPairs) {
+                final AssetFile rawFile = similarPair.getRawFile();
+                final List<AssetFile> similarAlphaFiles = similarPair.getAlphaFiles();
+                //打印原文件情况 和 相似 alpha文件情况
+                System.out.printf("原文件: %s 路径: %s \n",rawFile.toFormatName(),rawFile.getFile().getPath());
+                final int size = similarAlphaFiles.size();
+                for (int i = 0; i < size; i++) {
+                    final AssetFile saf = similarAlphaFiles.get(0);
+                    System.out.printf("\t[%d] Alpha文件: %s 路径: %s \n",i,saf.toFormatName(),saf.getFile().getPath());
+                }
+                //用户输入
+                final String command = IoUtils.readCommand("请从上述序号中选择匹配的Alpha文件，或直接提供一个Alpha文件的绝对路径", (line) -> {
+                    if (NumberUtils.isInt(line)) {
+                        final int i = Integer.parseInt(line);
+                        return i >= 0 && i < size;
+                    } else {
+                        return this.alphaFiles.stream().anyMatch(f -> f.getFile().getPath().equals(line));
+                    }
+                });
+                // 如果输入的是数字 ，直接取该文件
+                @SuppressWarnings("OptionalGetWithoutIsPresent")
+                final AssetFile alphaFile = NumberUtils.isInt(command)?similarAlphaFiles.get(Integer.parseInt(command))
+                // 如果输入的是路径 ，从总表里找到这个文件
+                        :( this.alphaFiles.stream().filter(f -> f.getFile().getPath().equals(command)).findFirst().get());
+                //保存到字典
+                dictionary.put(rawFile.getRelativePath(),alphaFile.getParentPath());
+                dictionary.save();
+                //添加到匹配列表
+                this.matchedPairs.add(new AssetFilePair(rawFile, Collections.singletonList(alphaFile)));
+            }
+        }
 
         // 开始合并匹配完成的文件
         this.matchedPairs.stream().limit(limit == null ? this.matchedPairs.size() : limit).forEach(pair -> {

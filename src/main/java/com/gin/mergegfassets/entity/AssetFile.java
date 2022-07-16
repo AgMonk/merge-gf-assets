@@ -17,7 +17,6 @@ import java.util.regex.Pattern;
 public class AssetFile {
     public static final Pattern PATTERN_1 = Pattern.compile("^(.+?)\\((\\d+)\\)$");
     public static final Pattern PATTERN_2 = Pattern.compile("^(.+?)_(\\d+)$");
-    public static final Pattern NUMBER = Pattern.compile("^\\d+$");
     public static final String ALPHA = "_ALPHA";
     public static final String HD = "_HD";
     public static final String HE = "_HE";
