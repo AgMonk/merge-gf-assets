@@ -23,6 +23,7 @@ public class AssetFile {
     public static final String HE = "_HE";
     public static final String DIFF = "_DIFF";
     public static final String DAMAGED = "_DAMAGED";
+    public static final String ASSET = "\\assets";
 
 
     public static final String HE_STRING_1 = "\u202A";
@@ -196,5 +197,12 @@ public class AssetFile {
         return this.toFormatName()+this.extensions;
     }
 
-
+    /**
+     * 文件的相对路径
+     * @return 文件的相对路径
+     */
+    public String getRelativePath(){
+        final String path = this.file.getPath();
+        return path.substring(path.indexOf(ASSET)+ASSET.length());
+    }
 }
