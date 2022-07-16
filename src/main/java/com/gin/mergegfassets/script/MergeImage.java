@@ -42,7 +42,9 @@ public class MergeImage {
 
         BufferedImage combined = combine(rawImage, alphaImage);
         ImageIO.write(combined, "PNG", destFile);
-        TimeUtils.printlnTimeCost(start, "[INFO] Completed： " + destFile.getName() + " ");
+
+        final String m = String.format("[INFO][%s] 合并完成: %s ", Thread.currentThread().getName(), destFile.getName());
+        TimeUtils.printlnTimeCost(start, m);
     }
 
     /**

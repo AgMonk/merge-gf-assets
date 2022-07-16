@@ -20,7 +20,7 @@ public class Dictionary {
      */
     public static final String METHOD_COPY = "COPY";
 
-    TreeMap<String, String> data;
+    TreeMap<String, String> data = new TreeMap<>();
 
     File file;
 
