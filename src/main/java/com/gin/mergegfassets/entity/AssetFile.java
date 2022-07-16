@@ -135,6 +135,16 @@ public class AssetFile {
         return true;
     }
 
+    /**
+     * 判断两个文件是否相似
+     * @param assetFile 另一个资源文件
+     * @return 是否相似
+     */
+    public boolean similar(AssetFile assetFile){
+        // todo
+        return false;
+    }
+
     public AssetFile(File file) {
         this.file = file;
         this.parentPath = file.getParentFile().getPath();

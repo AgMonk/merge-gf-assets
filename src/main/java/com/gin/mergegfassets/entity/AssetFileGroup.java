@@ -30,6 +30,7 @@ public class AssetFileGroup {
                 .stream()
                 //过滤编队界面图
                 .filter(f -> !f.getName().endsWith("_N.png"))
+                .filter(f -> !f.getName().contains("_N_"))
                 .filter(f -> !f.getName().endsWith("_Pass.png"))
                 //过滤spine图
                 .filter(f -> !f.getParentFile().getName().contains("spine"))
@@ -41,9 +42,9 @@ public class AssetFileGroup {
 
     /**
      * 根据精准匹配的结果
-     * @param group     文件组
      * @param outputDir 输出目录
      * @param executor  线程池
+     * @param limit  合并的数量
      */
     public void mergeByMatchPair(File outputDir, ThreadPoolTaskExecutor executor, Integer limit) throws InterruptedException {
         System.out.println("Merge Start: " + this.path);
@@ -96,6 +97,7 @@ public class AssetFileGroup {
                 });
 
         while (executor.getActiveCount() > 0) {
+            //noinspection BusyWait
             Thread.sleep(1000);
         }
         System.out.println("--------------------------");
