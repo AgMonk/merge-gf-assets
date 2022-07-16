@@ -26,9 +26,8 @@ public class MergeImage {
         final BufferedImage rawImage = ImageIO.read(rawFile);
         final int width = rawImage.getWidth();
         final int height = rawImage.getHeight();
-        // Alpha图
+        // Alpha图 type = 24
         final Mat alphaMat = Imgcodecs.imread(alphaFile.getPath(), Imgcodecs.IMREAD_UNCHANGED);
-
         //如果尺寸不一致，缩放 alpha文件
         if (width != alphaMat.width()) {
             //缩放图片

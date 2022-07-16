@@ -41,7 +41,8 @@ public class MergeGfAssetsApplication {
         //妖精立绘
         final AssetFileGroup fairyFiles = new AssetFileGroup(assetDir, "\\resources\\dabao\\pics\\fairy");
 
-        gunFiles.mergeByMatchPair(outputDir,executor, 30);
+//        gunFiles.mergeByMatchPair(outputDir,executor, 30);
+        charFiles.mergeByMatchPair(outputDir,executor, 100);
 
 
         executor.shutdown();

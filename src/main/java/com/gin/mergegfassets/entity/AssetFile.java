@@ -31,7 +31,7 @@ public class AssetFile {
 
     public static final String PIC = "PIC_";
     public static final String DAMAGED_1 = "_D_";
-    public static final String DAMAGED_2 = "_D.png";
+    public static final String DAMAGED_2 = "_D.PNG";
     public static final String NPC_1 = "NPC_";
     public static final String NPC_2 = "NPC-";
     public static final String S = "_";

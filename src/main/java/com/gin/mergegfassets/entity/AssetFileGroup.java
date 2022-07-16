@@ -51,6 +51,18 @@ public class AssetFileGroup {
         this.rawFiles
                 .stream().limit(limit == null ? this.rawFiles.size() : limit)
                 .forEach(rawFile -> {
+                    //指定目标文件 创建目录
+                    final String path = rawFile.getParentPath().substring(rawFile.getParentPath().indexOf(this.path));
+                    final File destFile = new File(outputDir.getPath() + path + '/' + rawFile.toFilename());
+                    if (destFile.exists()) {
+                        //目标文件已存在:跳过
+                        System.out.printf("[WARN] File Exists Skipped : %s \n", destFile.getPath());
+                        return;
+                    } else {
+                        //noinspection ResultOfMethodCallIgnored
+                        destFile.getParentFile().mkdirs();
+                    }
+                    //筛选、排序匹配的alpha文件
                     final List<AssetFile> matchedFiles = this.alphaFiles.stream()
                             .filter(f -> rawFile.getParentPath().equals(f.getParentPath()))
                             .filter(rawFile::matchPair)
@@ -64,24 +76,22 @@ public class AssetFileGroup {
                                 return 0;
                             }).collect(Collectors.toList());
                     if (matchedFiles.size() > 0) {
+                        //匹配信息
+//                        final String m = matchedFiles.stream().map(f -> String.format("%s -> %s", f.toFormatName(), f.getFile().getName())).collect(Collectors.joining(" | "));
+//                        System.out.printf("%s -> %s match [%s] \n" ,rawFile.toFormatName(), rawFile.getFile().getName(),m);
+
+
+                        //找到精准匹配的alpha文件
                         final AssetFile alphaFile = matchedFiles.get(0);
-                        final String path = rawFile.getParentPath().substring(rawFile.getParentPath().indexOf(this.path));
-                        final File destFile = new File(outputDir.getPath() + path + '/' + rawFile.toFilename());
-                        if (destFile.exists()) {
-                            System.out.printf("[warning] File Exists Skipped : %s \n", destFile.getPath());
-                        } else {
-                            //noinspection ResultOfMethodCallIgnored
-                            destFile.getParentFile().mkdirs();
-                            executor.execute(() -> {
-                                try {
-                                    MergeImage.mergeOpenCv(rawFile.getFile(), alphaFile.getFile(), destFile);
-                                } catch (IOException e) {
-                                    throw new RuntimeException(e);
-                                }
-                            });
-                        }
+                        executor.execute(() -> {
+                            try {
+                                MergeImage.mergeOpenCv(rawFile.getFile(), alphaFile.getFile(), destFile);
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
                     } else {
-                        System.out.printf("[error] can not match alpha : %s \n", rawFile.getFile().getPath());
+                        System.out.printf("[ERROR] can not match alpha : %s \n", rawFile.getFile().getPath());
                     }
                 });
 
