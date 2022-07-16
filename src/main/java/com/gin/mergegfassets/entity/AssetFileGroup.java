@@ -158,7 +158,7 @@ public class AssetFileGroup {
                 // 如果输入的是路径 ，从总表里找到这个文件
                         :( this.alphaFiles.stream().filter(f -> f.getFile().getPath().equals(command)).findFirst().get());
                 //保存到字典
-                dictionary.put(rawFile.getRelativePath(),alphaFile.getParentPath());
+                dictionary.put(rawFile.getRelativePath(),alphaFile.getRelativePath());
                 dictionary.save();
                 //添加到匹配列表
                 this.matchedPairs.add(new AssetFilePair(rawFile, Collections.singletonList(alphaFile)));
