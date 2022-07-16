@@ -108,10 +108,23 @@ public class AssetFile {
      */
     @SuppressWarnings("RedundantIfStatement")
     public boolean matchPair(AssetFile assetFile) {
-        //两个文件必须一个为原图 一个为 alpha
-        if (this.alpha == assetFile.isAlpha()) {
+        //两个文件必须相似
+        if (!similar(assetFile)) {
             return false;
         }
+        //两个文件的version必须相同
+        if (!Objects.equals(this.version, assetFile.getVersion())) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 判断两个文件是否相似
+     * @param assetFile 另一个资源文件
+     * @return 是否相似
+     */
+    public boolean similar(AssetFile assetFile){
         //两个文件必须同为河蟹或非河蟹立绘
         if (this.he != assetFile.isHe()) {
             return false;
@@ -128,21 +141,7 @@ public class AssetFile {
         if (!Objects.equals(this.character, assetFile.getCharacter())) {
             return false;
         }
-        //两个文件的version必须相同
-        if (!Objects.equals(this.version, assetFile.getVersion())) {
-            return false;
-        }
         return true;
-    }
-
-    /**
-     * 判断两个文件是否相似
-     * @param assetFile 另一个资源文件
-     * @return 是否相似
-     */
-    public boolean similar(AssetFile assetFile){
-        // todo
-        return false;
     }
 
     public AssetFile(File file) {
@@ -197,6 +196,5 @@ public class AssetFile {
         return this.toFormatName()+this.extensions;
     }
 
-    // todo 配对失败时从总文件列表中查找可能的备选项，复制到临时文件夹中供选择；选定后添加到字典中保存
 
 }

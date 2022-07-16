@@ -6,6 +6,7 @@ import com.gin.mergegfassets.utils.TimeUtils;
 import lombok.Data;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -57,14 +58,16 @@ public class AssetFileGroup {
                     final File destFile = new File(outputDir.getPath() + path + '/' + rawFile.toFilename());
                     if (destFile.exists()) {
                         //目标文件已存在:跳过
-                        System.out.printf("[WARN] File Exists Skipped : %s \n", destFile.getPath());
+                        System.out.printf("[INFO] File Exists Skipped : %s \n", destFile.getPath());
                         return;
                     } else {
                         //noinspection ResultOfMethodCallIgnored
                         destFile.getParentFile().mkdirs();
                     }
+                    //相似文件
+                    final List<AssetFile> similarFiles = this.alphaFiles.stream().filter(AssetFile::isAlpha).filter(rawFile::similar).collect(Collectors.toList());
                     //筛选、排序匹配的alpha文件
-                    final List<AssetFile> matchedFiles = this.alphaFiles.stream()
+                    final List<AssetFile> matchedFiles = similarFiles.stream()
                             .filter(f -> rawFile.getParentPath().equals(f.getParentPath()))
                             .filter(rawFile::matchPair)
                             .sorted((a, b) -> {
@@ -77,6 +80,7 @@ public class AssetFileGroup {
                                 return 0;
                             }).collect(Collectors.toList());
                     if (matchedFiles.size() > 0) {
+                        //精准匹配到 alpha文件
                         //匹配信息
 //                        final String m = matchedFiles.stream().map(f -> String.format("%s -> %s", f.toFormatName(), f.getFile().getName())).collect(Collectors.joining(" | "));
 //                        System.out.printf("%s -> %s match [%s] \n" ,rawFile.toFormatName(), rawFile.getFile().getName(),m);
@@ -91,8 +95,25 @@ public class AssetFileGroup {
                                 throw new RuntimeException(e);
                             }
                         });
-                    } else {
-                        System.out.printf("[ERROR] can not match alpha : %s \n", rawFile.getFile().getPath());
+                    } else if (similarFiles.size()>0) {
+                        System.out.printf("[WARN] Found %d similar Alpha Files: %s \n",similarFiles.size(), rawFile.getFile().getPath());
+                        //发现并列出相似的文件
+                        for (int i = 0; i < similarFiles.size(); i++) {
+                            final AssetFile assetFile = similarFiles.get(i);
+                            System.out.printf("\t %d : %s -> %s \n",i, assetFile.toFormatName(),assetFile.getFile().getPath());
+                        }
+                        // 打开对应文件夹 确认选择
+                        final Desktop desktop = Desktop.getDesktop();
+                        similarFiles.stream().map(AssetFile::getParentPath).distinct().forEach(f-> {
+                            try {
+                                desktop.open(new File(f));
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
+
+                    }else {
+                        System.out.printf("[ERROR] Can Not Match Alpha File: %s \n", rawFile.getFile().getPath());
                     }
                 });
 
