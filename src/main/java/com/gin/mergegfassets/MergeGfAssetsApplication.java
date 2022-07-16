@@ -30,7 +30,7 @@ public class MergeGfAssetsApplication {
         File assetDir = new File(config.getAssetPath());
         //指定 输出文件夹路径
         File outputDir = new File(config.getOutputPath());
-        final ThreadPoolTaskExecutor executor = TasksUtil.getExecutor("Merge", config.getThreads());
+        final ThreadPoolTaskExecutor executor = TasksUtil.getExecutor("线程", config.getThreads());
 
         //扫描assets文件夹
 
@@ -41,8 +41,8 @@ public class MergeGfAssetsApplication {
         //妖精立绘
         final AssetFileGroup fairyFiles = new AssetFileGroup(assetDir, "\\resources\\dabao\\pics\\fairy");
 
-        gunFiles.mergeByMatchPair(outputDir,executor, 30);
-//        charFiles.mergeByMatchPair(outputDir,executor, 100);
+//        gunFiles.mergeByMatchPair(outputDir,executor, 5,dictionary);
+        charFiles.mergeByMatchPair(outputDir,executor, 100, dictionary);
 
 
         executor.shutdown();
