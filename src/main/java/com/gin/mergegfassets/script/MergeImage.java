@@ -1,6 +1,7 @@
 package com.gin.mergegfassets.script;
 
 import com.gin.mergegfassets.utils.TimeUtils;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.core.Size;
@@ -8,7 +9,9 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -24,16 +27,18 @@ public class MergeImage {
         final long start = System.currentTimeMillis();
         // 原图
         final BufferedImage rawImage = ImageIO.read(rawFile);
+        BufferedImage alphaImage = ImageIO.read(alphaFile);
         final int width = rawImage.getWidth();
         final int height = rawImage.getHeight();
-        // Alpha图 type = 24
-        final Mat alphaMat = Imgcodecs.imread(alphaFile.getPath(), Imgcodecs.IMREAD_UNCHANGED);
         //如果尺寸不一致，缩放 alpha文件
-        if (width != alphaMat.width()) {
+        if (width != alphaImage.getWidth()) {
+            // Alpha图 type = 24
+            final Mat alphaMat = bufferToMat(alphaImage);
+//            final Mat alphaMat = Imgcodecs.imread(alphaFile.getPath(), Imgcodecs.IMREAD_UNCHANGED);
             //缩放图片
             Imgproc.resize(alphaMat, alphaMat, new Size(width, height), 0, 0, Imgproc.INTER_CUBIC);
+            alphaImage = matToBuffer(".png", alphaMat);
         }
-        final BufferedImage alphaImage = matToBuffer(".png", alphaMat);
 
         BufferedImage combined = combine(rawImage, alphaImage);
         ImageIO.write(combined, "PNG", destFile);
@@ -72,6 +77,20 @@ public class MergeImage {
         return ImageIO.read(in);
     }
 
+    public static Mat bufferToMat(BufferedImage bufferedImage) {
+        BufferedImage image = new BufferedImage(bufferedImage.getWidth(), bufferedImage.getHeight(), BufferedImage.TYPE_4BYTE_ABGR_PRE);
+        Graphics2D g = image.createGraphics();
+        try {
+            g.setComposite(AlphaComposite.Src);
+            g.drawImage(bufferedImage, 0, 0, null);
+        } finally {
+            g.dispose();
+        }
+        final DataBufferByte dbi = (DataBufferByte) image.getRaster().getDataBuffer();
+        final Mat mat = Mat.eye(bufferedImage.getWidth(), bufferedImage.getHeight(), CvType.CV_8UC4);
+        mat.put(0, 0, dbi.getData());
+        return mat;
+    }
 
     public static void init() {
         // 加载动态库
