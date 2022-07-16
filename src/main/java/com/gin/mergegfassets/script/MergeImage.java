@@ -94,7 +94,7 @@ public class MergeImage {
 
     public static void init() {
         // 加载动态库
-        final String path = "/" + System.getProperty("user.dir") + "/opencv_java460.dll";
+        final String path = "/" + System.getProperty("user.dir") + "/opencv_java.dll";
         System.out.println("Loading " + path);
         System.load(path);
 //        System.load(url.getPath());
