@@ -140,7 +140,7 @@ public class FileUtils {
     public static List<File> listAllFilesWithTimeCost(File dir){
         final long start = System.currentTimeMillis();
         final List<File> list = listAllFiles(dir);
-        System.out.printf("Scanned %s | Found %d Files | ",dir.getPath(),list.size());
+        System.out.printf("扫描目录 %s | 发现 %d 个文件 | ",dir.getPath(),list.size());
         TimeUtils.printlnTimeCost(start, null);
         return list;
     }

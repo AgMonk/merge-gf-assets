@@ -19,7 +19,7 @@ public class IoUtils {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         File assetDir = null;
         while (assetDir == null || !assetDir.exists()) {
-            System.out.print("AssetPath >> ");
+            System.out.print("请提供assets目录路径 >> ");
             assetDir = new File(reader.readLine());
         }
         return assetDir.getPath();
@@ -29,7 +29,7 @@ public class IoUtils {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         File output = null;
         while (output == null || !output.exists()) {
-            System.out.print("Output >> ");
+            System.out.print("请提供输出目录路径 >> ");
             output = new File(reader.readLine());
         }
         //noinspection ResultOfMethodCallIgnored
@@ -49,6 +49,5 @@ public class IoUtils {
         }
         return Integer.parseInt(line);
     }
-
 
 }

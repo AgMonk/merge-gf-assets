@@ -33,7 +33,7 @@ public class TasksUtil {
         // 等待所有任务结束后再关闭线程池
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.initialize();
-        System.out.printf("Created %d Threads\n",coreSize);
+        System.out.printf("启动 %d 个线程\n",coreSize);
         return executor;
     }
 }

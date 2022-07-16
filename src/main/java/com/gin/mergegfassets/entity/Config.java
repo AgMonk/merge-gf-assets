@@ -29,7 +29,7 @@ public class Config {
             final Config config = new Config();
             config.setAssetPath(IoUtils.readAssetPath());
             config.setOutputPath(IoUtils.readOutputPath());
-            config.setThreads(IoUtils.readNumber("Threads"));
+            config.setThreads(IoUtils.readNumber("请提供使用的线程数量 "));
             JsonUtils.writeToFile(file,config);
             return config;
         }

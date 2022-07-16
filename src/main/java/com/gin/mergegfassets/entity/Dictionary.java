@@ -44,7 +44,7 @@ public class Dictionary {
             this.data = JSONObject.parseObject(res).to(new TypeReference<TreeMap<String, String>>() {
             });
         }else{
-            System.out.println("Created Dictionary " + this.file.getPath());
+            System.out.println("创建字典 " + this.file.getPath());
         }
     }
 
