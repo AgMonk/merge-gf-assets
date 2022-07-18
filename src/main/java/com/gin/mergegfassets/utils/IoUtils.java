@@ -58,6 +58,9 @@ public class IoUtils {
         while (line==null || !done){
             System.out.print(info + " >> ");
             line = reader.readLine();
+            if (line.startsWith("\"") && line.endsWith("\"")) {
+                line = line.substring(1, line.length() - 1);
+            }
             done = func.apply(line);
         }
         return line;

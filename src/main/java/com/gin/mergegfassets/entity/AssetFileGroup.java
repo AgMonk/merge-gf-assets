@@ -215,6 +215,7 @@ public class AssetFileGroup {
                     System.out.printf("\t[%d] Alpha文件: %s 路径: %s \n", i, saf.toFormatName(), saf.getFile().getPath());
                 }
                 //打开文件夹
+//                CmdUtils.explorerSelect(rawFile.getFile().getPath());
                 final List<String> dirs = similarAlphaFiles.stream().map(f -> f.getFile().getParentFile().getPath()).distinct().collect(Collectors.toList());
                 final Desktop desktop = Desktop.getDesktop();
                 if (dirs.size() > 0) {
