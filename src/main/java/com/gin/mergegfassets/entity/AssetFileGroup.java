@@ -98,12 +98,17 @@ public class AssetFileGroup {
             }
 
             //相似文件
-            final List<AssetFile> similarFiles = this.alphaFiles.stream().filter(rawFile::similar).collect(Collectors.toList());
-            //匹配文件
-            final List<AssetFile> matchedFiles = similarFiles.stream()
-                    .filter(f -> rawFile.getParentPath().equals(f.getParentPath()))
-                    .filter(rawFile::matchPair)
-                    .sorted((a, b) -> {
+            final List<AssetFile> similarFiles = this.alphaFiles.stream()
+                    .filter(rawFile::similar)
+                    .sorted((a,b) -> {
+                        final boolean b1 = rawFile.getParentPath().equals(a.getParentPath());
+                        final boolean b2 = rawFile.getParentPath().equals(b.getParentPath());
+                        if (b1 && !b2) {
+                            return -1;
+                        }
+                        if (!b1 && b2) {
+                            return 1;
+                        }
                         if (a.isHd() && !b.isHd()) {
                             return -1;
                         }
@@ -111,7 +116,12 @@ public class AssetFileGroup {
                             return 1;
                         }
                         return 0;
-                    }).limit(1).collect(Collectors.toList());
+                    }).collect(Collectors.toList());
+            //匹配文件
+            final List<AssetFile> matchedFiles = similarFiles.stream()
+                    .filter(f -> rawFile.getParentPath().equals(f.getParentPath()))
+                    .filter(rawFile::matchPair)
+                    .limit(1).collect(Collectors.toList());
             if (matchedFiles.size() > 0) {
                 this.matchedPairs.add(new AssetFilePair(rawFile, matchedFiles));
             } else {
@@ -164,13 +174,9 @@ public class AssetFileGroup {
                 final List<String> dirs = similarAlphaFiles.stream().map(f -> f.getFile().getParentFile().getPath()).distinct().collect(Collectors.toList());
                 final Desktop desktop = Desktop.getDesktop();
                 if (dirs.size() > 0) {
-                    dirs.forEach(f -> {
-                        try {
-                            desktop.open(new File(f));
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                    for (int i = dirs.size() - 1; i >= 0; i--) {
+                        desktop.open(new File(dirs.get(i)));
+                    }
                 } else {
                     desktop.open(rawFile.getFile().getParentFile());
                 }
