@@ -47,7 +47,13 @@ public class AssetFileGroup {
      */
     List<AssetFile> copyFiles = new ArrayList<>();
 
-    public AssetFileGroup(File assetDir, String path) {
+    File outputDir;
+
+    Dictionary dictionary;
+
+    ThreadPoolTaskExecutor executor;
+
+    public AssetFileGroup(File assetDir, String path, File outputDir, Dictionary dictionary, ThreadPoolTaskExecutor executor) {
         this.path = path;
         final List<AssetFile> files = FileUtils.listAllFilesWithTimeCost(new File(assetDir.getPath() + path))
                 .stream()
@@ -62,14 +68,72 @@ public class AssetFileGroup {
 
         this.rawFiles = files.stream().filter(assetFile -> !assetFile.isAlpha()).collect(Collectors.toList());
         this.alphaFiles = files.stream().filter(AssetFile::isAlpha).collect(Collectors.toList());
+        this.outputDir = outputDir;
+        this.dictionary = dictionary;
+        this.executor = executor;
+    }
 
+    /**
+     * 合并文件
+     * @param limit 合并的数量
+     */
+    public void mergeByMatchPair(Integer limit)
+            throws InterruptedException, IOException {
+        System.out.println("--------------------------");
+        System.out.println("合并开始: " + this.path);
+        final long start = System.currentTimeMillis();
+
+        doMatch();
+
+        doSimilar();
+
+        doCopy();
+
+        doMerge(limit);
+
+        while (this.executor.getActiveCount() > 0) {
+            //noinspection BusyWait
+            Thread.sleep(1000);
+        }
+        System.out.println("--------------------------");
+        TimeUtils.printlnTimeCost(start, "合并完成 ");
+    }
+
+    /**
+     * 开始合并匹配完成的文件
+     * @param limit 合并数量
+     */
+    private void doMerge(Integer limit) {
+        // 开始合并匹配完成的文件
+        this.matchedPairs.stream().limit(limit == null ? this.matchedPairs.size() : limit).forEach(pair -> {
+            final AssetFile rawFile = pair.getRawFile();
+            final AssetFile alphaFile = pair.getAlphaFiles().get(0);
+            final File destFile = getDestFile(this.outputDir, rawFile);
+            this.executor.execute(() -> {
+                try {
+                    MergeImage.mergeOpenCv(rawFile.getFile(), alphaFile.getFile(), destFile);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        });
+    }
+
+    /**
+     * 复制复制列表的文件
+     */
+    private void doCopy() {
+        //todo 复制复制列表的文件
 
     }
 
-    private void match(File outputDir, Dictionary dictionary) {
+    /**
+     * 归类文件
+     */
+    private void doMatch() {
         for (AssetFile rawFile : this.rawFiles) {
             //目标文件路径
-            final File destFile = getDestFile(outputDir, rawFile);
+            final File destFile = getDestFile(this.outputDir, rawFile);
             if (destFile.exists()) {
                 //目标文件已存在:跳过
                 skippedFiles.add(rawFile);
@@ -81,8 +145,8 @@ public class AssetFileGroup {
             }
             //查询字典看是否有匹配
             final String relativePath = rawFile.getRelativePath();
-            if (dictionary.hasKey(relativePath)) {
-                final String value = dictionary.get(relativePath);
+            if (this.dictionary.hasKey(relativePath)) {
+                final String value = this.dictionary.get(relativePath);
                 if (COPY.equalsIgnoreCase(value)) {
                     this.copyFiles.add(rawFile);
                     continue;
@@ -100,7 +164,7 @@ public class AssetFileGroup {
             //相似文件
             final List<AssetFile> similarFiles = this.alphaFiles.stream()
                     .filter(rawFile::similar)
-                    .sorted((a,b) -> {
+                    .sorted((a, b) -> {
                         final boolean b1 = rawFile.getParentPath().equals(a.getParentPath());
                         final boolean b2 = rawFile.getParentPath().equals(b.getParentPath());
                         if (b1 && !b2) {
@@ -128,36 +192,15 @@ public class AssetFileGroup {
                 this.similarPairs.add(new AssetFilePair(rawFile, similarFiles));
             }
         }
-        System.out.printf("匹配完成 跳过: %d ,复制: %d ,匹配: %d ,相似: %d\n", skippedFiles.size(), copyFiles.size(), matchedPairs.size(),similarPairs.size());
+        System.out.printf("匹配完成 跳过: %d ,复制: %d ,匹配: %d ,相似: %d\n", skippedFiles.size(), copyFiles.size(), matchedPairs.size(), similarPairs.size());
     }
 
     /**
-     * 获取目标文件
-     * @param outputDir 输出目录
-     * @param rawFile   原文件
-     * @return 目标文件
+     * 为每一个相似的文件指定匹配的 Alpha 文件
+     * @throws IOException 异常
      */
-    private File getDestFile(File outputDir, AssetFile rawFile) {
-        final String destPath = rawFile.getParentPath().substring(rawFile.getParentPath().indexOf(this.path));
-        return new File(outputDir.getPath() + destPath + '/' + rawFile.toFilename());
-    }
 
-    /**
-     * 根据精准匹配的结果
-     * @param outputDir  输出目录
-     * @param executor   线程池
-     * @param limit      合并的数量
-     * @param dictionary 字典
-     */
-    public void mergeByMatchPair(File outputDir, ThreadPoolTaskExecutor executor, Integer limit, Dictionary dictionary)
-            throws InterruptedException, IOException {
-        System.out.println("--------------------------");
-        System.out.println("合并开始: " + this.path);
-        final long start = System.currentTimeMillis();
-
-        match(outputDir, dictionary);
-
-        // 为每一个相似的文件指定匹配的 Alpha 文件
+    private void doSimilar() throws IOException {
         if (this.similarPairs.size() > 0) {
             // todo
             for (AssetFilePair similarPair : this.similarPairs) {
@@ -184,11 +227,11 @@ public class AssetFileGroup {
                 //提示文字
                 StringBuilder sb = new StringBuilder();
                 sb.append("请输入指令：\n");
-                if (similarSize>0){
+                if (similarSize > 0) {
                     sb.append("\t");
-                    sb.append(String.format("序号 [0~%d]：从上述列出的Alpha文件中选定一个与该文件匹配\n",similarSize-1));
+                    sb.append(String.format("序号 [0~%d]：从上述列出的Alpha文件中选定一个与该文件匹配\n", similarSize - 1));
                 }
-                sb.append("\t绝对路径 ：给定一个Alpha文件的绝对路径与该文件匹配，必须处在该文件夹内：").append(outputDir.getPath()).append(this.path).append("\n");
+                sb.append("\t绝对路径 ：给定一个Alpha文件的绝对路径与该文件匹配，必须处在该文件夹内：").append(this.outputDir.getPath()).append(this.path).append("\n");
                 sb.append("\tcopy ：表示该文件不需要合并，直接复制\n");
                 sb.append("\tskip ：表示该文件不需要任何处理\n");
 
@@ -205,51 +248,36 @@ public class AssetFileGroup {
                 });
                 if (SKIP.equalsIgnoreCase(command)) {
                     // 如果输入的是skip 跳过该文件 ，记录到字典
-                    dictionary.put(rawFile.getRelativePath(), SKIP);
-                    dictionary.save();
+                    this.dictionary.put(rawFile.getRelativePath(), SKIP);
+                    this.dictionary.save();
                 } else if (COPY.equalsIgnoreCase(command)) {
                     // 如果输入的是copy 跳过该文件 ，记录到字典
-                    dictionary.put(rawFile.getRelativePath(), COPY);
-                    dictionary.save();
+                    this.dictionary.put(rawFile.getRelativePath(), COPY);
+                    this.dictionary.save();
                 } else {
                     // 如果输入的是数字 ，直接取该文件
                     @SuppressWarnings("OptionalGetWithoutIsPresent") final AssetFile alphaFile = NumberUtils.isInt(command) ? similarAlphaFiles.get(Integer.parseInt(command))
                             // 如果输入的是路径 ，从总表里找到这个文件
                             : (this.alphaFiles.stream().filter(f -> f.getFile().getPath().equals(command)).findFirst().get());
                     //保存到字典
-                    dictionary.put(rawFile.getRelativePath(), alphaFile.getRelativePath());
-                    dictionary.save();
+                    this.dictionary.put(rawFile.getRelativePath(), alphaFile.getRelativePath());
+                    this.dictionary.save();
                     //添加到匹配列表
                     this.matchedPairs.add(new AssetFilePair(rawFile, Collections.singletonList(alphaFile)));
                 }
             }
         }
+    }
 
-        //todo 复制复制列表的文件
-
-
-        // 开始合并匹配完成的文件
-        this.matchedPairs.stream().limit(limit == null ? this.matchedPairs.size() : limit).forEach(pair -> {
-            final AssetFile rawFile = pair.getRawFile();
-            final AssetFile alphaFile = pair.getAlphaFiles().get(0);
-            final File destFile = getDestFile(outputDir, rawFile);
-            executor.execute(() -> {
-                try {
-                    MergeImage.mergeOpenCv(rawFile.getFile(), alphaFile.getFile(), destFile);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-        });
-
-
-
-        while (executor.getActiveCount() > 0) {
-            //noinspection BusyWait
-            Thread.sleep(1000);
-        }
-        System.out.println("--------------------------");
-        TimeUtils.printlnTimeCost(start, "合并完成 ");
+    /**
+     * 获取目标文件
+     * @param outputDir 输出目录
+     * @param rawFile   原文件
+     * @return 目标文件
+     */
+    private File getDestFile(File outputDir, AssetFile rawFile) {
+        final String destPath = rawFile.getParentPath().substring(rawFile.getParentPath().indexOf(this.path));
+        return new File(outputDir.getPath() + destPath + '/' + rawFile.toFilename());
     }
 
 }

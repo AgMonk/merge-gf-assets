@@ -35,14 +35,14 @@ public class MergeGfAssetsApplication {
         //扫描assets文件夹
 
         //标清立绘 + 差分等其他文件
-        final AssetFileGroup charFiles = new AssetFileGroup(assetDir, "\\characters");
+        final AssetFileGroup charFiles = new AssetFileGroup(assetDir, "\\characters", outputDir, dictionary, executor);
         //高清立绘
-        final AssetFileGroup gunFiles = new AssetFileGroup(assetDir, "\\resources\\dabao\\pics\\guns");
+        final AssetFileGroup gunFiles = new AssetFileGroup(assetDir, "\\resources\\dabao\\pics\\guns", outputDir, dictionary, executor);
         //妖精立绘
-        final AssetFileGroup fairyFiles = new AssetFileGroup(assetDir, "\\resources\\dabao\\pics\\fairy");
+        final AssetFileGroup fairyFiles = new AssetFileGroup(assetDir, "\\resources\\dabao\\pics\\fairy", outputDir, dictionary, executor);
 
 //        gunFiles.mergeByMatchPair(outputDir,executor, 5,dictionary);
-        charFiles.mergeByMatchPair(outputDir,executor, 10, dictionary);
+        charFiles.mergeByMatchPair(10);
 
 
         executor.shutdown();
