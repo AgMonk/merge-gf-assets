@@ -43,8 +43,8 @@ public class MergeGfAssetsApplication {
 
 //        gunFiles.mergeByMatchPair(outputDir,executor, 5,dictionary);
         charFiles.merge(null);
-        gunFiles.merge(null);
         fairyFiles.merge(null);
+        gunFiles.merge(null);
 
 
         executor.shutdown();

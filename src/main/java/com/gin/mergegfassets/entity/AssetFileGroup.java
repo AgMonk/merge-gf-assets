@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
 /**
@@ -186,13 +187,16 @@ public class AssetFileGroup {
      */
     private void doMerge(Integer limit) {
         // 开始合并匹配完成的文件
-        this.matchedPairs.stream().limit(limit == null ? this.matchedPairs.size() : limit).forEach(pair -> {
+        final int maxSize = limit == null ? this.matchedPairs.size() : limit;
+        CountDownLatch latch = new CountDownLatch(maxSize);
+
+        this.matchedPairs.stream().limit(maxSize).forEach(pair -> {
             final AssetFile rawFile = pair.getRawFile();
             final AssetFile alphaFile = pair.getAlphaFiles().get(0);
             final File destFile = getDestFile(rawFile);
             this.executor.execute(() -> {
                 try {
-                    MergeImage.mergeOpenCv(rawFile.getFile(), alphaFile.getFile(), destFile);
+                    MergeImage.mergeOpenCv(rawFile.getFile(), alphaFile.getFile(), destFile, latch, maxSize);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }

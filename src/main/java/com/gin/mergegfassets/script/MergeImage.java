@@ -16,6 +16,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * @author : ginstone
@@ -23,7 +24,7 @@ import java.io.InputStream;
  * @since : 2022/7/13 16:30
  **/
 public class MergeImage {
-    public static void mergeOpenCv(File rawFile, File alphaFile, File destFile) throws IOException {
+    public static void mergeOpenCv(File rawFile, File alphaFile, File destFile, CountDownLatch latch, int maxSize) throws IOException {
         final long start = System.currentTimeMillis();
         // 原图
         final BufferedImage rawImage = ImageIO.read(rawFile);
@@ -43,7 +44,9 @@ public class MergeImage {
         BufferedImage combined = combine(rawImage, alphaImage);
         ImageIO.write(combined, "PNG", destFile);
 
-        final String m = String.format("[INFO][%s] 合并完成: %s ", Thread.currentThread().getName(), destFile.getName());
+        latch.countDown();
+        final String progress = String.format("%d/%d", maxSize - latch.getCount(), maxSize);
+        final String m = String.format("[INFO][%s][%s] 合并完成: %s ", Thread.currentThread().getName(), progress, destFile.getName());
         TimeUtils.printlnTimeCost(start, m);
     }
 
