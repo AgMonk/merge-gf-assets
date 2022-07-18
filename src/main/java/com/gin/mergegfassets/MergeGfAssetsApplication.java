@@ -42,7 +42,7 @@ public class MergeGfAssetsApplication {
         final AssetFileGroup fairyFiles = new AssetFileGroup(assetDir, "\\resources\\dabao\\pics\\fairy", outputDir, dictionary, executor);
 
 //        gunFiles.mergeByMatchPair(outputDir,executor, 5,dictionary);
-        charFiles.mergeByMatchPair(10);
+        charFiles.merge(null);
 
 
         executor.shutdown();

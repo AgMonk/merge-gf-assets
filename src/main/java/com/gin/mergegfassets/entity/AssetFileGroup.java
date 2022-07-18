@@ -78,7 +78,7 @@ public class AssetFileGroup {
      * 合并文件
      * @param limit 合并的数量
      */
-    public void mergeByMatchPair(Integer limit)
+    public void merge(Integer limit)
             throws InterruptedException, IOException {
         System.out.println("--------------------------");
         System.out.println("合并开始: " + this.path);
@@ -101,31 +101,15 @@ public class AssetFileGroup {
     }
 
     /**
-     * 开始合并匹配完成的文件
-     * @param limit 合并数量
-     */
-    private void doMerge(Integer limit) {
-        // 开始合并匹配完成的文件
-        this.matchedPairs.stream().limit(limit == null ? this.matchedPairs.size() : limit).forEach(pair -> {
-            final AssetFile rawFile = pair.getRawFile();
-            final AssetFile alphaFile = pair.getAlphaFiles().get(0);
-            final File destFile = getDestFile(this.outputDir, rawFile);
-            this.executor.execute(() -> {
-                try {
-                    MergeImage.mergeOpenCv(rawFile.getFile(), alphaFile.getFile(), destFile);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-        });
-    }
-
-    /**
      * 复制复制列表的文件
      */
-    private void doCopy() {
-        //todo 复制复制列表的文件
-
+    private void doCopy() throws IOException {
+        for (AssetFile copyFile : this.copyFiles) {
+            final File destFile = getDestFile(copyFile);
+            if (!destFile.exists()) {
+                FileUtils.copyFile(copyFile.getFile(), destFile);
+            }
+        }
     }
 
     /**
@@ -134,7 +118,7 @@ public class AssetFileGroup {
     private void doMatch() {
         for (AssetFile rawFile : this.rawFiles) {
             //目标文件路径
-            final File destFile = getDestFile(this.outputDir, rawFile);
+            final File destFile = getDestFile(rawFile);
             if (destFile.exists()) {
                 //目标文件已存在:跳过
                 skippedFiles.add(rawFile);
@@ -194,6 +178,26 @@ public class AssetFileGroup {
             }
         }
         System.out.printf("匹配完成 跳过: %d ,复制: %d ,匹配: %d ,相似: %d\n", skippedFiles.size(), copyFiles.size(), matchedPairs.size(), similarPairs.size());
+    }
+
+    /**
+     * 开始合并匹配完成的文件
+     * @param limit 合并数量
+     */
+    private void doMerge(Integer limit) {
+        // 开始合并匹配完成的文件
+        this.matchedPairs.stream().limit(limit == null ? this.matchedPairs.size() : limit).forEach(pair -> {
+            final AssetFile rawFile = pair.getRawFile();
+            final AssetFile alphaFile = pair.getAlphaFiles().get(0);
+            final File destFile = getDestFile(rawFile);
+            this.executor.execute(() -> {
+                try {
+                    MergeImage.mergeOpenCv(rawFile.getFile(), alphaFile.getFile(), destFile);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        });
     }
 
     /**
@@ -275,13 +279,12 @@ public class AssetFileGroup {
 
     /**
      * 获取目标文件
-     * @param outputDir 输出目录
-     * @param rawFile   原文件
+     * @param rawFile 原文件
      * @return 目标文件
      */
-    private File getDestFile(File outputDir, AssetFile rawFile) {
+    private File getDestFile(AssetFile rawFile) {
         final String destPath = rawFile.getParentPath().substring(rawFile.getParentPath().indexOf(this.path));
-        return new File(outputDir.getPath() + destPath + '/' + rawFile.toFilename());
+        return new File(this.outputDir.getPath() + destPath + '/' + rawFile.toFilename());
     }
 
 }
