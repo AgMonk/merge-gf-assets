@@ -8,6 +8,7 @@ import com.gin.mergegfassets.utils.TimeUtils;
 import lombok.Data;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,6 +24,8 @@ import java.util.stream.Collectors;
  **/
 @Data
 public class AssetFileGroup {
+    public static final String SKIP = "SKIP";
+    public static final String COPY = "COPY";
     String path;
 
     List<AssetFile> rawFiles;
@@ -39,6 +42,10 @@ public class AssetFileGroup {
      * 跳过的文件
      */
     List<AssetFile> skippedFiles = new ArrayList<>();
+    /**
+     * 直接复制的文件
+     */
+    List<AssetFile> copyFiles = new ArrayList<>();
 
     public AssetFileGroup(File assetDir, String path) {
         this.path = path;
@@ -49,7 +56,8 @@ public class AssetFileGroup {
                 .filter(f -> !f.getName().contains("_N_"))
                 .filter(f -> !f.getName().endsWith("_Pass.png"))
                 //过滤spine图
-                .filter(f -> !f.getParentFile().getName().contains("spine"))
+                .filter(f -> !f.getPath().contains("spine"))
+                .filter(f -> !f.getPath().contains("commander"))
                 .map(AssetFile::new).collect(Collectors.toList());
 
         this.rawFiles = files.stream().filter(assetFile -> !assetFile.isAlpha()).collect(Collectors.toList());
@@ -74,8 +82,17 @@ public class AssetFileGroup {
             //查询字典看是否有匹配
             final String relativePath = rawFile.getRelativePath();
             if (dictionary.hasKey(relativePath)) {
+                final String value = dictionary.get(relativePath);
+                if (COPY.equalsIgnoreCase(value)) {
+                    this.copyFiles.add(rawFile);
+                    continue;
+                }
+                if (SKIP.equalsIgnoreCase(value)) {
+                    this.skippedFiles.add(rawFile);
+                    continue;
+                }
                 //找到匹配，使用匹配结果
-                final List<AssetFile> alphaFileFromDic = this.alphaFiles.stream().filter(f -> f.getRelativePath().equals(dictionary.get(relativePath))).collect(Collectors.toList());
+                final List<AssetFile> alphaFileFromDic = this.alphaFiles.stream().filter(f -> f.getRelativePath().equals(value)).collect(Collectors.toList());
                 this.matchedPairs.add(new AssetFilePair(rawFile, alphaFileFromDic));
                 continue;
             }
@@ -101,7 +118,7 @@ public class AssetFileGroup {
                 this.similarPairs.add(new AssetFilePair(rawFile, similarFiles));
             }
         }
-        System.out.printf("匹配完成 跳过: %d ,匹配: %d ,相似: %d \n", skippedFiles.size(), matchedPairs.size(), similarPairs.size());
+        System.out.printf("匹配完成 跳过: %d ,复制: %d ,匹配: %d ,相似: %d\n", skippedFiles.size(), copyFiles.size(), matchedPairs.size(),similarPairs.size());
     }
 
     /**
@@ -131,39 +148,79 @@ public class AssetFileGroup {
         match(outputDir, dictionary);
 
         // 为每一个相似的文件指定匹配的 Alpha 文件
-        if (this.similarPairs.size()>0) {
-        // todo
+        if (this.similarPairs.size() > 0) {
+            // todo
             for (AssetFilePair similarPair : this.similarPairs) {
                 final AssetFile rawFile = similarPair.getRawFile();
                 final List<AssetFile> similarAlphaFiles = similarPair.getAlphaFiles();
                 //打印原文件情况 和 相似 alpha文件情况
-                System.out.printf("原文件: %s 路径: %s \n",rawFile.toFormatName(),rawFile.getFile().getPath());
-                final int size = similarAlphaFiles.size();
-                for (int i = 0; i < size; i++) {
+                System.out.printf("原文件: %s 路径: %s \n", rawFile.toFormatName(), rawFile.getFile().getPath());
+                final int similarSize = similarAlphaFiles.size();
+                for (int i = 0; i < similarSize; i++) {
                     final AssetFile saf = similarAlphaFiles.get(i);
-                    System.out.printf("\t[%d] Alpha文件: %s 路径: %s \n",i,saf.toFormatName(),saf.getFile().getPath());
+                    System.out.printf("\t[%d] Alpha文件: %s 路径: %s \n", i, saf.toFormatName(), saf.getFile().getPath());
                 }
+                //打开文件夹
+                final List<String> dirs = similarAlphaFiles.stream().map(f -> f.getFile().getParentFile().getPath()).distinct().collect(Collectors.toList());
+                final Desktop desktop = Desktop.getDesktop();
+                if (dirs.size() > 0) {
+                    dirs.forEach(f -> {
+                        try {
+                            desktop.open(new File(f));
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+                } else {
+                    desktop.open(rawFile.getFile().getParentFile());
+                }
+
+                //提示文字
+                StringBuilder sb = new StringBuilder();
+                sb.append("请输入指令：\n");
+                if (similarSize>0){
+                    sb.append("\t");
+                    sb.append(String.format("序号 [0~%d]：从上述列出的Alpha文件中选定一个与该文件匹配\n",similarSize-1));
+                }
+                sb.append("\t绝对路径 ：给定一个Alpha文件的绝对路径与该文件匹配，必须处在该文件夹内：").append(outputDir.getPath()).append(this.path).append("\n");
+                sb.append("\tcopy ：表示该文件不需要合并，直接复制\n");
+                sb.append("\tskip ：表示该文件不需要任何处理\n");
+
                 //用户输入
-                final String command = IoUtils.readCommand("请从上述序号中选择匹配的Alpha文件，或直接提供一个Alpha文件的绝对路径", (line) -> {
+                final String command = IoUtils.readCommand(sb.toString(), (line) -> {
                     if (NumberUtils.isInt(line)) {
                         final int i = Integer.parseInt(line);
-                        return i >= 0 && i < size;
+                        return i >= 0 && i < similarSize;
+                    } else if (SKIP.equalsIgnoreCase(line) || COPY.equalsIgnoreCase(line)) {
+                        return true;
                     } else {
                         return this.alphaFiles.stream().anyMatch(f -> f.getFile().getPath().equals(line));
                     }
                 });
-                // 如果输入的是数字 ，直接取该文件
-                @SuppressWarnings("OptionalGetWithoutIsPresent")
-                final AssetFile alphaFile = NumberUtils.isInt(command)?similarAlphaFiles.get(Integer.parseInt(command))
-                // 如果输入的是路径 ，从总表里找到这个文件
-                        :( this.alphaFiles.stream().filter(f -> f.getFile().getPath().equals(command)).findFirst().get());
-                //保存到字典
-                dictionary.put(rawFile.getRelativePath(),alphaFile.getRelativePath());
-                dictionary.save();
-                //添加到匹配列表
-                this.matchedPairs.add(new AssetFilePair(rawFile, Collections.singletonList(alphaFile)));
+                if (SKIP.equalsIgnoreCase(command)) {
+                    // 如果输入的是skip 跳过该文件 ，记录到字典
+                    dictionary.put(rawFile.getRelativePath(), SKIP);
+                    dictionary.save();
+                } else if (COPY.equalsIgnoreCase(command)) {
+                    // 如果输入的是copy 跳过该文件 ，记录到字典
+                    dictionary.put(rawFile.getRelativePath(), COPY);
+                    dictionary.save();
+                } else {
+                    // 如果输入的是数字 ，直接取该文件
+                    @SuppressWarnings("OptionalGetWithoutIsPresent") final AssetFile alphaFile = NumberUtils.isInt(command) ? similarAlphaFiles.get(Integer.parseInt(command))
+                            // 如果输入的是路径 ，从总表里找到这个文件
+                            : (this.alphaFiles.stream().filter(f -> f.getFile().getPath().equals(command)).findFirst().get());
+                    //保存到字典
+                    dictionary.put(rawFile.getRelativePath(), alphaFile.getRelativePath());
+                    dictionary.save();
+                    //添加到匹配列表
+                    this.matchedPairs.add(new AssetFilePair(rawFile, Collections.singletonList(alphaFile)));
+                }
             }
         }
+
+        //todo 复制复制列表的文件
+
 
         // 开始合并匹配完成的文件
         this.matchedPairs.stream().limit(limit == null ? this.matchedPairs.size() : limit).forEach(pair -> {
@@ -178,6 +235,7 @@ public class AssetFileGroup {
                 }
             });
         });
+
 
 
         while (executor.getActiveCount() > 0) {

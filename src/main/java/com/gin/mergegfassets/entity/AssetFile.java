@@ -17,6 +17,8 @@ import java.util.regex.Pattern;
 public class AssetFile {
     public static final Pattern PATTERN_1 = Pattern.compile("^(.+?)\\((\\d+)\\)$");
     public static final Pattern PATTERN_2 = Pattern.compile("^(.+?)_(\\d+)$");
+    public static final Pattern PATTERN_3 = Pattern.compile("^(.+?)_(.+?\\d+)$");
+    public static final Pattern PATTERN_4 = Pattern.compile("^(.+?)_(.+?)$");
     public static final String ALPHA = "_ALPHA";
     public static final String HD = "_HD";
     public static final String HE = "_HE";
@@ -72,6 +74,10 @@ public class AssetFile {
      * 是否为差分立绘
      */
     boolean difference;
+    /**
+     * 是否为皮肤
+     */
+    boolean skin;
 
     /**
      * 格式化名称 ：角色名 是否差分 版本名 是否重创 是否河蟹 是否高清  是否alpha
@@ -112,6 +118,10 @@ public class AssetFile {
         if (!similar(assetFile)) {
             return false;
         }
+        //两个文件必须同为差分或非差分
+        if (this.difference != assetFile.isDifference()) {
+            return false;
+        }
         //两个文件的version必须相同
         if (!Objects.equals(this.version, assetFile.getVersion())) {
             return false;
@@ -129,12 +139,12 @@ public class AssetFile {
         if (this.he != assetFile.isHe()) {
             return false;
         }
-        //两个文件必须同为差分或非差分
-        if (this.difference != assetFile.isDifference()) {
-            return false;
-        }
         //两个文件必须同为重创或非重创
         if (this.damaged != assetFile.isDamaged()) {
+            return false;
+        }
+        //两个文件必须同为皮肤或非皮肤
+        if (this.skin != assetFile.isSkin()) {
             return false;
         }
         //两个文件的角色名必须相同
@@ -168,6 +178,22 @@ public class AssetFile {
                 .replace(HE_STRING_1, "")
                 .replace("_D", "");
 
+        //文件名格式为 xxx_xx数字 的
+        final Matcher matcher3 = PATTERN_3.matcher(n);
+        final Matcher matcher4 = PATTERN_4.matcher(n);
+        if (matcher3.find()){
+            // 疑似差分
+            this.character = matcher3.group(1);
+            this.version = matcher3.group(2);
+            this.difference = true;
+            this.skin = false;
+        } else if (matcher4.find() && !parentPath.toUpperCase().contains(matcher4.group(0))){
+            // 疑似差分
+            this.character = matcher4.group(1);
+            this.version = matcher4.group(2);
+            this.difference = true;
+            this.skin = false;
+        }
         //文件名格式为 xxx_数字 的
         final Matcher matcher2 = PATTERN_2.matcher(n);
         if (matcher2.find()) {
@@ -175,7 +201,10 @@ public class AssetFile {
             this.version = matcher2.group(2);
             final int index = Integer.parseInt(this.version);
             //判断是否为差分
-            this.difference = (index < 100) && !parentPath.toUpperCase().contains(matcher2.group(0));
+            //路径中包含匹配值
+            final boolean contains = parentPath.toUpperCase().contains(matcher2.group(0));
+            this.difference = (index < 100) && !contains;
+            this.skin = (index > 100) || contains;
         }
         //文件名格式为 xxx(数字)
         final Matcher matcher1 = PATTERN_1.matcher(n);
@@ -183,12 +212,14 @@ public class AssetFile {
             this.character = matcher1.group(1);
             this.version = matcher1.group(2);
             this.difference = true;
+            this.skin = false;
         }
 
         if (this.character==null){
             this.character = n;
             this.version = null;
             this.difference = false;
+            this.skin = false;
         }
     }
 
