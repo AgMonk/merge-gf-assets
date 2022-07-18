@@ -80,81 +80,6 @@ public class AssetFile {
      */
     boolean skin;
 
-    /**
-     * 格式化名称 ：角色名 是否差分 版本名 是否重创 是否河蟹 是否高清  是否alpha
-     * @return 格式化名称
-     */
-    public String toFormatName(){
-
-        final StringBuilder sb = new StringBuilder(this.character);
-        if (this.difference){
-            sb.append(DIFF);
-        }
-        if (this.version!=null){
-            sb.append(S).append(this.version);
-        }
-        if (this.damaged){
-            sb.append(DAMAGED);
-        }
-        if (this.he){
-            sb.append(HE);
-        }
-        if (this.hd){
-            sb.append(HD);
-        }
-        if (this.alpha){
-            sb.append(ALPHA);
-        }
-        return sb.toString();
-    }
-
-    /**
-     * 精准匹配为配对的文件
-     * @param assetFile 另一个资源文件
-     * @return 精准匹配
-     */
-    @SuppressWarnings("RedundantIfStatement")
-    public boolean matchPair(AssetFile assetFile) {
-        //两个文件必须相似
-        if (!similar(assetFile)) {
-            return false;
-        }
-        //两个文件必须同为差分或非差分
-        if (this.difference != assetFile.isDifference()) {
-            return false;
-        }
-        //两个文件的version必须相同
-        if (!Objects.equals(this.version, assetFile.getVersion())) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * 判断两个文件是否相似
-     * @param assetFile 另一个资源文件
-     * @return 是否相似
-     */
-    public boolean similar(AssetFile assetFile){
-        //两个文件必须同为河蟹或非河蟹立绘
-        if (this.he != assetFile.isHe()) {
-            return false;
-        }
-        //两个文件必须同为重创或非重创
-        if (this.damaged != assetFile.isDamaged()) {
-            return false;
-        }
-        //两个文件必须同为皮肤或非皮肤
-        if (this.skin != assetFile.isSkin()) {
-            return false;
-        }
-        //两个文件的角色名必须相同
-        if (!Objects.equals(this.character, assetFile.getCharacter())) {
-            return false;
-        }
-        return true;
-    }
-
     public AssetFile(File file) {
         this.file = file;
         this.parentPath = file.getParentFile().getPath();
@@ -172,7 +97,7 @@ public class AssetFile {
         this.damaged = name.endsWith(DAMAGED_2) || name.contains(DAMAGED_1);
         this.extensions = name.substring(dotIndex);
 
-        final String n = name.substring(0,dotIndex)
+        final String n = name.substring(0, dotIndex)
                 .replaceAll(" #\\d+", "")
                 .replace(ALPHA, "")
                 .replace(HD, "")
@@ -231,16 +156,91 @@ public class AssetFile {
         }
     }
 
-    public String toFilename(){
-        return this.toFormatName()+this.extensions;
-    }
-
     /**
      * 文件的相对路径
      * @return 文件的相对路径
      */
-    public String getRelativePath(){
+    public String getRelativePath() {
         final String path = this.file.getPath();
-        return path.substring(path.indexOf(ASSET)+ASSET.length());
+        return path.substring(path.indexOf(ASSET) + ASSET.length());
+    }
+
+    /**
+     * 精准匹配为配对的文件
+     * @param assetFile 另一个资源文件
+     * @return 精准匹配
+     */
+    @SuppressWarnings("RedundantIfStatement")
+    public boolean matchPair(AssetFile assetFile) {
+        //两个文件必须相似
+        if (!similar(assetFile)) {
+            return false;
+        }
+        //两个文件必须同为差分或非差分
+        if (this.difference != assetFile.isDifference()) {
+            return false;
+        }
+        //两个文件的version必须相同
+        if (!Objects.equals(this.version, assetFile.getVersion())) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 判断两个文件是否相似
+     * @param assetFile 另一个资源文件
+     * @return 是否相似
+     */
+    public boolean similar(AssetFile assetFile) {
+        //两个文件必须同为河蟹或非河蟹立绘
+        if (this.he != assetFile.isHe()) {
+            return false;
+        }
+        //两个文件必须同为重创或非重创
+        if (this.damaged != assetFile.isDamaged()) {
+            return false;
+        }
+        //两个文件必须同为皮肤或非皮肤
+        if (this.skin != assetFile.isSkin()) {
+            return false;
+        }
+        //两个文件的角色名必须相同
+        if (!Objects.equals(this.character, assetFile.getCharacter())) {
+            return false;
+        }
+        return true;
+    }
+
+    public String toFilename() {
+        return this.toFormatName() + this.extensions;
+    }
+
+    /**
+     * 格式化名称 ：角色名 是否差分 版本名 是否重创 是否河蟹 是否高清  是否alpha
+     * @return 格式化名称
+     */
+    public String toFormatName() {
+
+        final StringBuilder sb = new StringBuilder(this.character);
+        if (this.difference) {
+            sb.append(DIFF);
+        }
+        if (this.version != null) {
+            sb.append(S).append(this.version);
+        }
+        if (this.damaged) {
+            sb.append(DAMAGED);
+        }
+        if (this.he) {
+            sb.append(HE);
+        }
+        if (this.hd) {
+            sb.append(HD);
+        }
+        if (this.alpha) {
+            sb.append(ALPHA);
+        }
+        return sb.toString();
     }
 }

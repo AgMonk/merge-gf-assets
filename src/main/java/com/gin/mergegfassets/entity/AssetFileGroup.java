@@ -63,6 +63,7 @@ public class AssetFileGroup {
                 .filter(f -> !f.getName().endsWith("_Pass.png"))
                 //过滤spine图
                 .filter(f -> !f.getPath().contains("spine"))
+                .filter(f -> !f.getPath().contains("\\pet\\"))
                 .filter(f -> !f.getPath().contains("commander"))
                 .map(AssetFile::new).collect(Collectors.toList());
 
@@ -179,7 +180,7 @@ public class AssetFileGroup {
                         if (!a.isHd() && b.isHd()) {
                             return 1;
                         }
-                        return 0;
+                        return a.toFilename().compareTo(b.toFormatName());
                     }).collect(Collectors.toList());
             //匹配文件
             final List<AssetFile> matchedFiles = similarFiles.stream()
@@ -208,7 +209,7 @@ public class AssetFileGroup {
                 final List<AssetFile> similarAlphaFiles = similarPair.getAlphaFiles();
                 //打印原文件情况 和 相似 alpha文件情况
                 System.out.println("--------------------------");
-                System.out.printf("原文件: %s 路径: %s \n", rawFile.toFormatName(), rawFile.getFile().getPath());
+                System.out.printf("[INFO]原文件: %s 路径: %s \n", rawFile.toFormatName(), rawFile.getFile().getPath());
                 final int similarSize = similarAlphaFiles.size();
                 for (int i = 0; i < similarSize; i++) {
                     final AssetFile saf = similarAlphaFiles.get(i);
@@ -216,15 +217,16 @@ public class AssetFileGroup {
                 }
                 //打开文件夹
 //                CmdUtils.explorerSelect(rawFile.getFile().getPath());
-                final List<String> dirs = similarAlphaFiles.stream().map(f -> f.getFile().getParentFile().getPath()).distinct().collect(Collectors.toList());
                 final Desktop desktop = Desktop.getDesktop();
-                if (dirs.size() > 0) {
-                    for (int i = dirs.size() - 1; i >= 0; i--) {
-                        desktop.open(new File(dirs.get(i)));
-                    }
-                } else {
-                    desktop.open(rawFile.getFile().getParentFile());
-                }
+                desktop.open(rawFile.getFile().getParentFile());
+//                final List<String> dirs = similarAlphaFiles.stream().map(f -> f.getFile().getParentFile().getPath()).distinct().collect(Collectors.toList());
+//                if (dirs.size() > 0) {
+//                    for (int i = dirs.size() - 1; i >= 0; i--) {
+//                        desktop.open(new File(dirs.get(i)));
+//                    }
+//                } else {
+//                    desktop.open(rawFile.getFile().getParentFile());
+//                }
 
                 //提示文字
                 StringBuilder sb = new StringBuilder();
