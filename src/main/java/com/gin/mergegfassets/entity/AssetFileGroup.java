@@ -207,6 +207,7 @@ public class AssetFileGroup {
                 final AssetFile rawFile = similarPair.getRawFile();
                 final List<AssetFile> similarAlphaFiles = similarPair.getAlphaFiles();
                 //打印原文件情况 和 相似 alpha文件情况
+                System.out.println("--------------------------");
                 System.out.printf("原文件: %s 路径: %s \n", rawFile.toFormatName(), rawFile.getFile().getPath());
                 final int similarSize = similarAlphaFiles.size();
                 for (int i = 0; i < similarSize; i++) {

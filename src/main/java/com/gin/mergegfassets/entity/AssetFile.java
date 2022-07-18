@@ -17,8 +17,9 @@ import java.util.regex.Pattern;
 public class AssetFile {
     public static final Pattern PATTERN_1 = Pattern.compile("^(.+?)\\((\\d+)\\)$");
     public static final Pattern PATTERN_2 = Pattern.compile("^(.+?)_(\\d+)$");
-    public static final Pattern PATTERN_3 = Pattern.compile("^(.+?)_(.+?\\d+)$");
+    public static final Pattern PATTERN_3 = Pattern.compile("^(.+?)_M_(\\d+)$");
     public static final Pattern PATTERN_4 = Pattern.compile("^(.+?)_(.+?)$");
+    public static final Pattern PATTERN_5 = Pattern.compile("^(.+?)_(.+?\\d+)$");
     public static final String ALPHA = "_ALPHA";
     public static final String HD = "_HD";
     public static final String HE = "_HE";
@@ -179,15 +180,15 @@ public class AssetFile {
                 .replace("_D", "");
 
         //文件名格式为 xxx_xx数字 的
-        final Matcher matcher3 = PATTERN_3.matcher(n);
+        final Matcher matcher5 = PATTERN_5.matcher(n);
         final Matcher matcher4 = PATTERN_4.matcher(n);
-        if (matcher3.find()){
+        if (matcher5.find()) {
             // 疑似差分
-            this.character = matcher3.group(1);
-            this.version = matcher3.group(2);
+            this.character = matcher5.group(1);
+            this.version = matcher5.group(2);
             this.difference = true;
             this.skin = false;
-        } else if (matcher4.find() && !parentPath.toUpperCase().contains(matcher4.group(0))){
+        } else if (matcher4.find() && !parentPath.toUpperCase().contains(matcher4.group(0))) {
             // 疑似差分
             this.character = matcher4.group(1);
             this.version = matcher4.group(2);
@@ -196,6 +197,7 @@ public class AssetFile {
         }
         //文件名格式为 xxx_数字 的
         final Matcher matcher2 = PATTERN_2.matcher(n);
+        final Matcher matcher3 = PATTERN_3.matcher(n);
         if (matcher2.find()) {
             this.character = matcher2.group(1);
             this.version = matcher2.group(2);
@@ -206,6 +208,12 @@ public class AssetFile {
             this.difference = (index < 100) && !contains;
             this.skin = (index > 100) || contains;
         }
+        if (matcher3.find()) {
+            this.character = matcher3.group(1);
+            this.version = matcher3.group(2);
+            this.difference = true;
+            this.skin = false;
+        }
         //文件名格式为 xxx(数字)
         final Matcher matcher1 = PATTERN_1.matcher(n);
         if (matcher1.find()) {
@@ -215,7 +223,7 @@ public class AssetFile {
             this.skin = false;
         }
 
-        if (this.character==null){
+        if (this.character == null) {
             this.character = n;
             this.version = null;
             this.difference = false;
